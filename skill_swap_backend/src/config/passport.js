@@ -4,7 +4,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import User from "../models/user.model.js"
 import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
-import { uploadImage } from "../controllers/user.controller.js";
+import { uploadImage } from "../services/user.service.js";
 import { envConfig } from "./envConfig.js";
 
 passport.use(new GoogleStrategy({
