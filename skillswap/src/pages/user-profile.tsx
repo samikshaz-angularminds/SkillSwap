@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { Portal } from "@radix-ui/react-portal";
 import ProfileCard from "@/components/ProfileCard";
+import { Portal } from "@radix-ui/react-select";
 
 const UserProfile = () => {
   const [linkCopied, setLinkCopied] = useState<boolean>(false);

@@ -12,7 +12,6 @@ import {
 import { Input } from "../ui/input";
 import { Divide } from "lucide-react";
 import { Button } from "../ui/button";
-import { login } from "@/services/apiService";
 
 const LoginForm = ({
   formValues,
@@ -30,7 +29,7 @@ const LoginForm = ({
           name={formValue.label}
           render={({ field }) => (
             <div className="border rounded my-1 relative px-2 pt-2">
-              <span className="text-sm font-medium px-1 absolute -top-2 left-2 bg-white dark:bg-background">
+              <span className="text-sm font-medium px-1 absolute -top-3 left-2 bg-white dark:bg-background">
                 {formValue.label}
               </span>
               <Input
@@ -47,7 +46,7 @@ const LoginForm = ({
       <Button variant="default" type="submit" className="w-full mb-3" onClick={form.handleSubmit((data) =>{
         console.log(data);
         
-        login(data.Email,data.Password)})}>
+        })}>
         Login
       </Button>
     </Form>

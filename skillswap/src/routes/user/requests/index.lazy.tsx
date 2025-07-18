@@ -5,6 +5,3 @@ export const Route = createLazyFileRoute('/user/requests/')({
   component: ConnectionRequests,
 })
 
-function RouteComponent() {
-  return <div>Hello "/user/requests/"!</div>
-}

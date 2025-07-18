@@ -2,20 +2,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { FiShare2 } from "react-icons/fi";
 import {
   TwitterShareButton,
-  TwitterIcon,
   WhatsappShareButton,
   WhatsappIcon,
 } from "react-share";

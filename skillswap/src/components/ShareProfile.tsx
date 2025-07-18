@@ -1,13 +1,8 @@
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
-import { FiShare2 } from "react-icons/fi";
+import {  QRCodeSVG } from "qrcode.react";
 import { IoIosLink } from "react-icons/io";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
-import QRCodeStyling from "qr-code-styling";
-import { useRef } from "react";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { Alert, AlertTitle } from "./ui/alert";
 import SocialShareComponent from "./SocialShareComponent";
 
 const ShareProfile = ({
