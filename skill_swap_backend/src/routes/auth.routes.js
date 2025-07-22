@@ -1,7 +1,14 @@
+import {userLogin,userSignUp,refreshAccessToken} from "../controllers/auth.controller.js"
 import express from "express";
-import passport from "passport";
-import { envConfig } from "../config/envConfig.js";
 const router = express.Router();
+import { envConfig } from "../config/envConfig.js";
+import passport from "passport"
+
+// Auth routes
+router.post("/signup", userSignUp);
+router.post("/login", userLogin);
+
+router.post('/refresh-token',refreshAccessToken);
 
 // Route to initiate Google OAuth
 router.get(
