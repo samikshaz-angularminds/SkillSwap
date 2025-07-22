@@ -28,15 +28,20 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 const corsConfig = cors({
-  origin: "*",
-  credentials: true,
+  origin: ['http://localhost:3000'],
+  credentials:true
 });
 app.use(corsConfig);
 
 app.use('/',routes);
 
+app.get('/help',(req,res) => {
+console.log("help route: ",);
+res.send('help response')
+})
 app.use((req,res,next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'not found'));
 });
+
 
 export default app;

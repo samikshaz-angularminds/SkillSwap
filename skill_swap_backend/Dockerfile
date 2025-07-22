@@ -15,4 +15,4 @@ COPY . .
 CMD ["npm", "start"]
 
 # Expose the app's port (if needed)
-EXPOSE 3000
+EXPOSE 5000

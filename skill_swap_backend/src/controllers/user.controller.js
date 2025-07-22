@@ -88,6 +88,9 @@ export const userSignUp = catchAsync(async (req, res) => {
 export const userLogin = catchAsync(async (req, res) => {
     const { email, password } = req.body;
 
+    console.log("login request object-- ",req.body);
+    
+
     const user = await User.findOne({ email });
     // if (!user || !(await bcrypt.compare(password, user.password))) {
     if (!user) {

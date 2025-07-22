@@ -17,5 +17,6 @@ export const envConfig = {
   refresh_token_secret: process.env.REFRESH_TOKEN_SECRET,
   google_client_id: process.env.GOOGLE_CLIENT_ID,
   google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
-  google_redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+  google_failure_redirect_uri: process.env.GOOGLE_FAILURE_REDIRECT,
+  google_success_redirect_uri: process.env.GOOGLE_SUCCESS_REDIRECT
 }

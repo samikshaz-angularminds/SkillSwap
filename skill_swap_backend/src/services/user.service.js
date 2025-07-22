@@ -38,6 +38,32 @@ export const userSignUpService = async (userDetails) => {
 };
 
 /**
+ * Handles user login logic.
+ *
+ * @param {string} email - The user's email.
+ * @param {string} password - The user's password.
+ * @returns {Promise<Object|null>} An object containing access and refresh tokens if login is successful, or null otherwise.
+ */
+export const userLoginService = async (email, password) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return null; // User not found
+  }
+
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatch) {
+    return null; // Password doesn't match
+  }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  return { accessToken, refreshToken };
+};
+
+/**
  * Retrieves a user by their ID.
  *
  * @param {string} userId - The ID of the user to retrieve.
@@ -69,31 +95,7 @@ export const deleteUserService = async (userId) => {
   return user;
 };
 
-/**
- * Handles user login logic.
- *
- * @param {string} email - The user's email.
- * @param {string} password - The user's password.
- * @returns {Promise<Object|null>} An object containing access and refresh tokens if login is successful, or null otherwise.
- */
-export const userLoginService = async (email, password) => {
-  const user = await User.findOne({ email });
 
-  if (!user) {
-    return null; // User not found
-  }
-
-  const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-  if (!isPasswordMatch) {
-    return null; // Password doesn't match
-  }
-
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
-
-  return { accessToken, refreshToken };
-};
 /**
  * Generates a JWT access token for a user.
  *

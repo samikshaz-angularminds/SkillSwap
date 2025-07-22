@@ -1,17 +1,13 @@
-import React from "react";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-} from "../ui/form";
+import { Form, FormField, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
-import { Divide } from "lucide-react";
 import { Button } from "../ui/button";
+import { authService } from "@/services/auth.service";
+
+export interface loginData {
+    email: string,
+    password:string
+}
 
 const LoginForm = ({
   formValues,
@@ -20,35 +16,47 @@ const LoginForm = ({
 }) => {
   const form = useForm();
 
+  const handleLogin = async (data:loginData) => {
+    const response = await authService.login(data)
+
+    console.log(response);
+    
+  }
+
   return (
     <Form {...form}>
-      {formValues.map((formValue, index) => (
-        <FormField
-        key={index}
-          control={form.control}
-          name={formValue.label}
-          render={({ field }) => (
-            <div className="border rounded my-1 relative px-2 pt-2">
-              <span className="text-sm font-medium px-1 absolute -top-3 left-2 bg-white dark:bg-background">
-                {formValue.label}
-              </span>
-              <Input
-                className="border-0 focus:border-0 focus:ring-0 outline-none shadow-none focus-visible:border-0 focus-visible:ring-0 focus-visible:outline-0"
-                placeholder={formValue.placeholder}
-                {...field}
-              />
-              <FormMessage className="mt-1 text-xs text-red-500" />
-            </div>
-          )}
-        />
-      ))}
-
-      <Button variant="default" type="submit" className="w-full mb-3" onClick={form.handleSubmit((data) =>{
-        console.log(data);
-        
-        })}>
-        Login
-      </Button>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          {formValues.map((formValue, index) => (
+            <FormField
+              key={index}
+              control={form.control}
+              name={formValue.label.toLowerCase()}
+              render={({ field }) => (
+                <div className="border rounded my-1 relative px-2 pt-2">
+                  <span className="text-sm font-medium px-1 absolute -top-3 left-2 bg-white dark:bg-background">
+                    {formValue.label}
+                  </span>
+                  <Input
+                    className="border-0 focus:border-0 focus:ring-0 outline-none shadow-none focus-visible:border-0 focus-visible:ring-0 focus-visible:outline-0"
+                    placeholder={formValue.placeholder}
+                    {...field}
+                  />
+                  <FormMessage className="mt-1 text-xs text-red-500" />
+                </div>
+              )}
+            />
+          ))}
+        </div>
+        <Button
+          variant="default"
+          type="submit"
+          className="w-full mb-3"
+          onClick={form.handleSubmit((data) => handleLogin(data as loginData))}
+        >
+          Login
+        </Button>
+      </div>
     </Form>
   );
 };

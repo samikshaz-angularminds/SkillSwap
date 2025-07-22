@@ -22,10 +22,10 @@ const loginFormValues: { label: string; type: string; placeholder: string }[] =
 
 const signupFormValues: { label: string; type: string; placeholder: string }[] =
   [
-    { label: "name", type: "text", placeholder: "Enter your name" },
-    { label: "username", type: "text", placeholder: "Enter your username" },
+    { label: "Name", type: "text", placeholder: "Enter your name" },
+    { label: "Username", type: "text", placeholder: "Enter your username" },
     // { label: "bio", type: "email", placeholder: "Enter your bio" },
-    { label: "location", type: "text", placeholder: "Enter your location" },
+    { label: "Location", type: "text", placeholder: "Enter your location" },
     { label: "Email", type: "email", placeholder: "Enter your email" },
     { label: "Password", type: "password", placeholder: "Enter your password" },
   ];

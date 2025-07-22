@@ -1,7 +1,7 @@
 import axios, { AxiosError, type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
 import { getAccessToken } from "./token.service";
 
-const API_BASE_URL = import.meta.env.BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -66,6 +66,10 @@ const post = async <T>(
   data: any,
   retries: number = 3
 ): Promise<T | { error: string }> => {
+  console.log("url: ",url);
+  console.log("complete url: ",`${API_BASE_URL}/${url}`);
+  
+  
   return retryRequest(() => apiClient.post<T>(url, data), retries).catch(handleError)
 }
 
