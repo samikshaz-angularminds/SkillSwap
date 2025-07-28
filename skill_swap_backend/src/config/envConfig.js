@@ -18,5 +18,6 @@ export const envConfig = {
   google_client_id: process.env.GOOGLE_CLIENT_ID,
   google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
   google_failure_redirect_uri: process.env.GOOGLE_FAILURE_REDIRECT,
-  google_success_redirect_uri: process.env.GOOGLE_SUCCESS_REDIRECT
+  google_success_redirect_uri: process.env.GOOGLE_SUCCESS_REDIRECT,
+  google_callback_uri: process.env.GOOGLE_CALLBACK_URL
 }

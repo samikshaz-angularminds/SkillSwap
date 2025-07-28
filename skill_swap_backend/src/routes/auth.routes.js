@@ -1,12 +1,14 @@
-import {userLogin,userSignUp,refreshAccessToken} from "../controllers/auth.controller.js"
+import {userLogin,userSignUp,refreshAccessToken,userLogout} from "../controllers/auth.controller.js"
 import express from "express";
 const router = express.Router();
 import { envConfig } from "../config/envConfig.js";
 import passport from "passport"
+import {upload} from "../middlewares/multer.middleware.js"
 
 // Auth routes
-router.post("/signup", userSignUp);
+router.post("/signup",userSignUp);
 router.post("/login", userLogin);
+router.get('/logout',userLogout)
 
 router.post('/refresh-token',refreshAccessToken);
 

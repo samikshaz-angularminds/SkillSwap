@@ -1,5 +1,8 @@
+import cloudinary from 'cloudinary';
+
+
 // Upload Image Utility
-export const uploadImage = async (filePath) => {
+export const uploadImageUtil = async (filePath) => {
     const response = await cloudinary.uploader.upload(filePath, {
         folder: "SkillSwap",
     });

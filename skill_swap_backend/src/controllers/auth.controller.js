@@ -1,16 +1,24 @@
 import { v4 as uuidv4 } from "uuid";
 import { envConfig } from "../config/envConfig.js";
-import {userSignUpService} from "../services/auth.service.js"
+import { userSignUpService } from "../services/auth.service.js"
 import catchAsync from "../middlewares/catchAsync.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import sendResponse from "../responses/sendResponse.js"
 
 let refreshTokens = [];
 
+const REFRESH_TOKEN_COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'Strict',
+    path: '/refresh-token'
+}
+
 //geenerate 
 const generateAccessToken = (user) => {
-    console.log("user in access token: ", user);
+    // console.log("user in access token: ", user);
 
     const payload = {
         id: user._id.toString(),
@@ -22,7 +30,7 @@ const generateAccessToken = (user) => {
 }
 
 const generateRefreshToken = (user) => {
-    console.log("user in refresh token: ", user);
+    // console.log("user in refresh token: ", user);
     const payload = {
         id: user._id.toString(),
         email: user.email,
@@ -35,15 +43,15 @@ const generateRefreshToken = (user) => {
 
 // Register New User
 export const userSignUp = catchAsync(async (req, res) => {
-    // const { name, username, bio, location, email, password } = req.body;
-    console.log("email here-- ",req.body);
-    
-const existingUser = await User.findOne({email});
-  if (existingUser) {
-    throw new Error('User with this email already exists');
-  }
+    const { email } = req.body;
+    // console.log("email here-- ", req.body);
 
-    const signUpUser = await userSignUpService({...req.body});
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new Error('User with this email already exists');
+    }
+
+    const signUpUser = await userSignUpService({ ...req.body });
 
     // const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -52,23 +60,25 @@ const existingUser = await User.findOne({email});
     //     avatar = await uploadImage(req.file.path);
     // }
 
-   
+    // console.log("signup user: ",signUpUser);
 
-    sendResponse(res, {
-        statusCode: 201,
-        message: "User created successfully",
-        data: { userId: signUpUser._id },
-    });
+
+    sendResponse(res,
+        {
+            statusCode: 201,
+            message: "User created successfully",
+            data: { userId: signUpUser._id },
+        });
 });
 
 // Login User
 export const userLogin = catchAsync(async (req, res) => {
     const { email, password } = req.body;
 
-    console.log("login request object-- ",req.body);
-    
+    // console.log("login request object-- ", req.body);
 
-    const user = await User.findOne({ email });
+
+    const user = await User.findOne({ email, password });
     // if (!user || !(await bcrypt.compare(password, user.password))) {
     if (!user) {
 
@@ -79,20 +89,17 @@ export const userLogin = catchAsync(async (req, res) => {
         });
     }
 
-
-
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Strict',
-        path: '/refresh-token'
-    });
+    // console.log("access token-- ",accessToken);
+    // console.log("refresh token-- ",refreshToken);
 
-    sendResponse(res, {
-        message: "Login successful",
+    res.cookie("refreshToken", refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
+
+    return sendResponse(res, {
+        statusCode: 200,
+        message: "Login successful88",
         data: {
             accessToken,
             user: {
@@ -104,6 +111,15 @@ export const userLogin = catchAsync(async (req, res) => {
         },
     });
 });
+
+export const userLogout = catchAsync(async (req, res) => {
+    res.clearCookie("refreshToken", REFRESH_TOKEN_COOKIE_OPTIONS)
+    return sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "User logged out successfully",
+    })
+})
 
 // refresh access token
 export const refreshAccessToken = (req, res) => {

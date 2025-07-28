@@ -1,30 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
-
+import User from "../models/user.model.js";
 
 
 export const userSignUpService = async (userDetails) => {
-  // const { email, avatar, ...otherDetails } = userDetails;
-
-  console.log("user details-- ",userDetails.email);
-  
-
-  // Check if user with the given email already exists
-  
-
+  // console.log("user details-- ",userDetails.email);
    const newUser = await User.create({uid: uuidv4(),...userDetails});
 
-   console.log("new user == ",newUser);
-   
+  //  console.log("new user == ",newUser);
 
   // let avatarUrl = null;
   // if (avatar) {
   //   const avatarPublicId = uuidv4();
   //   avatarUrl = await uploadImageUtil(avatar, avatarPublicId);
   // }
-
-  // // Create new user
-  // const newUser = await User.create({ uid:uuidv4(),email, avatar: avatarUrl, ...otherDetails });
 
   return newUser;
 };

@@ -80,9 +80,21 @@ export const getUser = catchAsync(async (req, res) => {
         });
     }
 
-    sendResponse(es, {
+    sendResponse(res, {
         statusCode: 200,
         success: true,
         message: "User found successfully",
+    })
+})
+
+export const getAllUsers = catchAsync(async (req, res) => {
+    console.log("req.user--- ", req.user);
+    const users = await getAllUsersService(req.user._id);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Users found successfully!",
+        data: users
     })
 })

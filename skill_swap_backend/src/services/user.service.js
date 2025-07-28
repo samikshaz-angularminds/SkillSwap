@@ -2,7 +2,7 @@ import User from '../models/user.model.js';
 import cloudinary from 'cloudinary';
 import jwt from 'jsonwebtoken';
 import { envConfig } from '../config/envConfig.js';
-
+import { uploadImageUtil } from '../utils/uploadImageUtil.js';
 
 const cloudinaryV2 = cloudinary.v2;
 
@@ -27,6 +27,12 @@ export const getUserService = async (userId) => {
   return user;
 };
 
+export const getAllUsersService = async (userId) => {
+      const users = await User.find({_id: {$ne: userId}}).select("-_id -password -__v");
+
+      return users;
+}
+
 /**
  * Deletes a user by their ID.
  *
@@ -47,7 +53,6 @@ export const deleteUserService = async (userId) => {
 
   return user;
 };
-
 
 /**
  * Generates a JWT access token for a user.

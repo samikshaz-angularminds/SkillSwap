@@ -3,6 +3,8 @@ import { Form, FormField, FormMessage } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { authService } from "@/services/auth.service";
+import type { ApiResponse } from "@/services/api.service";
+import { setAccessToken } from "@/services/token.service";
 
 export interface loginData {
     email: string,
@@ -11,15 +13,23 @@ export interface loginData {
 
 const LoginForm = ({
   formValues,
+  setHasLoggedIn
 }: {
   formValues: { label: string; type: string; placeholder: string }[];
+  setHasLoggedIn: (value:boolean) => void
 }) => {
   const form = useForm();
 
   const handleLogin = async (data:loginData) => {
-    const response = await authService.login(data)
+    // Define the expected response type
+    const response = await authService.login(data) as ApiResponse;
 
     console.log(response);
+    
+    if(response.success){
+      setAccessToken(response.data.accessToken)
+      setHasLoggedIn(true)
+    }
     
   }
 

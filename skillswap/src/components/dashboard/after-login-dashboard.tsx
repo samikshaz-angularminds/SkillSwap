@@ -1,13 +1,49 @@
-import { DummyUsers, type User } from "@/data/dummy-users";
+import { DummyUsers } from "@/data/dummy-users";
 import { Avatar, AvatarImage } from "@radix-ui/react-avatar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import  { Button } from "../ui/button";
 import  { Card, CardContent } from "../ui/card";
 import { Link } from "@tanstack/react-router";
+import { userService } from "@/services/user.service";
+import type { ApiResponse } from "@/services/api.service";
+
+export interface Avatar {
+  public_id: string;
+  url: string;
+  _id: string;
+}
+
+export interface User {
+  uid: string;
+  username: string;
+  email: string;
+  bio: string;
+  avatar: Avatar;
+  availability: any[]; // Replace `any` with a more specific type if you have one
+  matches: any[];
+  messages: any[];
+  reviews: any[];
+  skillsOffered: any[];
+  skillsWanted: any[];
+  createdAt: string; // or `Date` if you're converting to Date objects
+  updatedAt: string;
+}
 
 const AfterLoginDashboard = () => {
+  const [availableUsers,setAvailableUsers] = useState<User[] | null>(null);
     // State to track dismissed user IDs
   const [dismissedUsers, setDismissedUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchAvailableUsers();
+  },[])
+
+  const fetchAvailableUsers = async () => {
+    const response = await userService.getAllUsers() as ApiResponse;
+setAvailableUsers(response.data)
+    console.log("available users: ",response.data);
+    
+  }
 
   // Function to handle dismissing a user
   const handleDismiss = (username: string) => {
@@ -23,23 +59,31 @@ const AfterLoginDashboard = () => {
   const visibleUsers = DummyUsers.filter(
     (user) => !dismissedUsers.includes(user.username)
   );
+
     return(
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-        {visibleUsers.map((user: User) => (
+        {availableUsers && availableUsers.map((user: User) => (
           <Card
             key={user.username}
             className="rounded-2xl shadow-md hover:shadow-lg transition-all relative"
           >
             <CardContent className="flex flex-col items-center text-center p-4">
               <Avatar className="w-20 h-20 mb-4">
-                <AvatarImage src={user.avatarUrl} alt={user.name} />
+                {
+                  user.avatar && user.avatar.url ? (
+
+                    <AvatarImage src={user.avatar.url} alt={user.avatar.url} />
+                  ) : (
+                    <AvatarImage src="../../../public/images/profile-image.png" alt="default image" />
+                  )
+                }
               </Avatar>
               <Link
                 to="/user/$username"
                 params={{ username: user.username }}
                 className="text-lg font-semibold mb-1 hover:underline hover:cursor-pointer "
               >
-                {user.name}
+                {user.username}
               </Link>
               <p className="text-muted-foreground text-sm mb-2">
                 @{user.username}
@@ -63,7 +107,7 @@ const AfterLoginDashboard = () => {
               size="icon"
               className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
               onClick={() => handleDismiss(user.username)}
-              aria-label={`Dismiss ${user.name}`}
+              aria-label={`Dismiss ${user.username}`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

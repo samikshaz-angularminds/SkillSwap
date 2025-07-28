@@ -7,8 +7,15 @@ import {
 import { Link } from "@tanstack/react-router";
 
 import LoginSignup from "./LoginSignup";
+import { isAuthenticated, removeAccessToken } from "@/services/token.service";
 
 const CustomHeader = () => {
+
+  const isLoggedIn = isAuthenticated();
+
+  const handleLogout = () => {
+    removeAccessToken();
+  }
   
   return (
     <header className="w-full sticky z-100 top-0 bg-gray-300 h-12 p-2">
@@ -27,8 +34,9 @@ const CustomHeader = () => {
           </Link>
         </div>
         <div className="flex gap-2">
-          <LoginSignup />
-          <LogOutIcon />
+          {
+            isLoggedIn ? <LogOutIcon onClick={handleLogout} className="cursor-pointer" /> : <LoginSignup />
+          }
         </div>
       </div>
     </header>

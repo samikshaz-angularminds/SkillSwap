@@ -11,7 +11,7 @@ import { FcGoogle } from "react-icons/fc"; // Google icon
 import { RxCross2 } from "react-icons/rx"; // Cross icon
 import { envConfig } from "@/config/envConfig";
 import LoginForm from "./forms/LoginForm";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SignUpForm from "./forms/SignUpForm";
 
 const loginFormValues: { label: string; type: string; placeholder: string }[] =
@@ -34,14 +34,17 @@ const signupFormValues: { label: string; type: string; placeholder: string }[] =
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [hasLoggedIn, setHasLoggedIn] = useState<boolean>(false);
 
-  const handleGoogleSignIn = () => {
+  useEffect(() => {},[hasLoggedIn])
+
+  const handleGoogleSignIn = () => {    
     window.location.href = `${envConfig.apiBaseUrl}/auth/google`;
   };
 
   return (
     <Dialog>
-      <DialogTrigger className="bg-white border rounded-sm shadow px-2 py-1">
+      <DialogTrigger className="bg-white border rounded-sm shadow px-2 py-1 cursor-pointer">
         Login/Signup
       </DialogTrigger>
       <DialogContent className="[&>button:not([data-slot='dialog-close'])]:hidden">
@@ -68,7 +71,7 @@ const LoginSignup = () => {
         <div className="flex flex-col gap-4">
           {isLogin ? (
             <div>
-              <LoginForm formValues={loginFormValues} />
+              <LoginForm setHasLoggedIn={setHasLoggedIn} formValues={loginFormValues} />
 
               <div className="text-center text-muted-foreground">OR</div>
               <Button

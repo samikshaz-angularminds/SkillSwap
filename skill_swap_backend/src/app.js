@@ -35,10 +35,6 @@ app.use(corsConfig);
 
 app.use('/',routes);
 
-app.get('/help',(req,res) => {
-console.log("help route: ",);
-res.send('help response')
-})
 app.use((req,res,next) => {
     next(new ApiError(httpStatus.NOT_FOUND, 'not found'));
 });
