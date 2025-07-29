@@ -1,4 +1,4 @@
-import {userLogin,userSignUp,refreshAccessToken,userLogout} from "../controllers/auth.controller.js"
+import {userLogin,userSignUp,refreshAccessToken,userLogout,resetPassword,verifyOtpPassword} from "../controllers/auth.controller.js"
 import express from "express";
 const router = express.Router();
 import { envConfig } from "../config/envConfig.js";
@@ -29,5 +29,9 @@ router.get(
     session: true, // Set to false if you're not using sessions
   })
 );
+
+
+router.post("/reset-password",resetPassword)
+router.post("/verify-otp",verifyOtpPassword)
 
 export default router;

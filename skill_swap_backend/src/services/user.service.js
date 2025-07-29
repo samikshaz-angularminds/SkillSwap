@@ -88,7 +88,7 @@ export const generateRefreshToken = (user) => {
  * @param {string} filePath - The path to the image file.
  * @returns {Promise<Object>} An object containing the public_id and url of the uploaded image.
  */
-export const uploadImage = async (filePath) => {
+export const updateProfileImageService = async (filePath) => {
   return uploadImageUtil(filePath);
 };
 

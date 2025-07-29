@@ -1,11 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 import { envConfig } from "../config/envConfig.js";
-import { userSignUpService } from "../services/auth.service.js"
+import { userSignUpService, resetPasswordService, verifyOtpService } from "../services/auth.service.js"
 import catchAsync from "../middlewares/catchAsync.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import sendResponse from "../responses/sendResponse.js"
+import ApiError from "../errors/ApiError.js";
 
 let refreshTokens = [];
 
@@ -39,6 +40,29 @@ const generateRefreshToken = (user) => {
     const token = jwt.sign(payload, envConfig.refresh_token_secret, { expiresIn: '7d' });
     refreshTokens.push(token);
     return token;
+}
+
+// refresh access token
+export const refreshAccessToken = (req, res) => {
+    const token = req.cookies.refreshToken;
+
+    if (!token || !refreshTokens.includes(token)) return res.sendStatus(403);
+
+    jwt.verify(token, envConfig.refresh_token_secret, (err, user) => {
+        if (err) return res.sendStatus(403);
+
+        const accessToken = generateAccessToken(user);
+
+        sendResponse(res,
+            {
+                statusCode: 200,
+                success: true,
+                message: "Access token refreshed successfully",
+                data: { accessToken }
+            }
+        );
+
+    })
 }
 
 // Register New User
@@ -109,6 +133,7 @@ export const userLogin = catchAsync(async (req, res) => {
                 avatar: user.avatar,
             },
         },
+        success: true
     });
 });
 
@@ -121,25 +146,38 @@ export const userLogout = catchAsync(async (req, res) => {
     })
 })
 
-// refresh access token
-export const refreshAccessToken = (req, res) => {
-    const token = req.cookies.refreshToken;
+export const resetPassword = catchAsync(async (req, res) => {
+    const { email } = req.body;
 
-    if (!token || !refreshTokens.includes(token)) return res.sendStatus(403);
+    const sendEmail = await resetPasswordService(email);
 
-    jwt.verify(token, envConfig.refresh_token_secret, (err, user) => {
-        if (err) return res.sendStatus(403);
+    return sendResponse(res, {
+        statusCode: 200,
+        message: "Email sent successfully",
+        success: true
+    });
+})
 
-        const accessToken = generateAccessToken(user);
+export const verifyOtpPassword = catchAsync(async (req,res) => {
+    const {otpInput} = req.body;
+    
+    const isVerified = await verifyOtpService(otpInput);
 
-        sendResponse(res,
-            {
-                statusCode: 200,
-                success: true,
-                message: "Access token refreshed successfully",
-                data: { accessToken }
-            }
-        );
+    if(!isVerified){
+        return sendResponse(res, {
+        statusCode: 400,
+        message: "otp verification has failed.",
+        success: false
+    });
+    }
 
-    })
-}
+    return sendResponse(res, {
+        statusCode: 200,
+        message: "Email verified successfully!",
+        success: true
+    });
+
+    console.log("otp input-- ",otpInput);
+    
+})
+

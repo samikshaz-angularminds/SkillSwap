@@ -2,8 +2,11 @@ import cloudinary from "../config/cloudinaryConfig.js";
 import catchAsync from "../middlewares/catchAsync.js";
 import User from "../models/user.model.js";
 import sendResponse from "../responses/sendResponse.js"; // Adjust the path as needed
+import {getUserService,getAllUsersService, deleteUserService} from "../services/user.service.js";
 
+export const updateProfileImage = catchAsync(async (req,res) => {
 
+})
 
 // Update User
 export const updateUser = catchAsync(async (req, res) => {
@@ -44,9 +47,9 @@ export const updateUser = catchAsync(async (req, res) => {
 
 // Delete User
 export const deleteUser = catchAsync(async (req, res) => {
-    const userId = req.params.id;
+    const userId = req.user._id;
 
-    const user = await User.findByIdAndDelete(userId);
+    const user = await deleteUserService(userId);
 
     if (!user) {
         return sendResponse(res, {
@@ -68,9 +71,9 @@ export const deleteUser = catchAsync(async (req, res) => {
 
 // get logged in user
 export const getUser = catchAsync(async (req, res) => {
-    const userId = req.params.id;
+    const userId = req.use._id;
 
-    const user = await User.findById(userId);
+    const user = await getUserService(userId);
 
     if (!user) {
         return sendResponse(res, {
@@ -87,8 +90,8 @@ export const getUser = catchAsync(async (req, res) => {
     })
 })
 
+// get all users
 export const getAllUsers = catchAsync(async (req, res) => {
-    console.log("req.user--- ", req.user);
     const users = await getAllUsersService(req.user._id);
 
     sendResponse(res, {
