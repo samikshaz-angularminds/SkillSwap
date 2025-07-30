@@ -1,10 +1,8 @@
 
-import mongoose from 'mongoose';
-import { envConfig } from './config/envConfig.js'
 import app from './app.js';
-let server;
+import { connectDB } from './config/db.js';
+import redisClient from './config/redis.js';
 
+await connectDB(app);
+await redisClient.connect();
 
-mongoose.connect(envConfig.mongo_url+envConfig.db_name).then((db) => {    
-    server = app.listen(envConfig.port, () => console.log(`listening to ${envConfig.port}`))
-})

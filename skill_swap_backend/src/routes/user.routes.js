@@ -3,7 +3,8 @@ import {
     updateUser,
     deleteUser,
     getUser,
-    getAllUsers
+    getAllUsers,
+    updateProfileImage
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import authenticateToken from "../middlewares/autehenticateToken.middleware.js";
@@ -12,8 +13,11 @@ const router = express.Router();
 // User routes
 router.route("/:id")
 .get(authenticateToken,getUser)
-router.put("/:id", upload.single("avatar"), updateUser);
-router.delete("/:id", deleteUser);
+.put(authenticateToken, updateUser)
+.delete(authenticateToken, deleteUser);
+
+
+router.put("/update-profile-pic/:id", upload.single("avatar"),updateProfileImage)
 
 router.get("/",authenticateToken,getAllUsers);
 

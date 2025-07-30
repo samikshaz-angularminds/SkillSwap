@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { envConfig } from "../config/envConfig.js";
-import { userSignUpService, resetPasswordService, verifyOtpService } from "../services/auth.service.js"
+import { userSignUpService, forgotPasswordService, verifyOtpService } from "../services/auth.service.js"
 import catchAsync from "../middlewares/catchAsync.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -146,10 +146,10 @@ export const userLogout = catchAsync(async (req, res) => {
     })
 })
 
-export const resetPassword = catchAsync(async (req, res) => {
+export const forgotPassword = catchAsync(async (req, res) => {
     const { email } = req.body;
 
-    const sendEmail = await resetPasswordService(email);
+    await forgotPasswordService(email);
 
     return sendResponse(res, {
         statusCode: 200,
@@ -159,9 +159,9 @@ export const resetPassword = catchAsync(async (req, res) => {
 })
 
 export const verifyOtpPassword = catchAsync(async (req,res) => {
-    const {otpInput} = req.body;
+    const {otpInput,email} = req.body;    
     
-    const isVerified = await verifyOtpService(otpInput);
+    const isVerified = await verifyOtpService({otpInput,email});
 
     if(!isVerified){
         return sendResponse(res, {
@@ -176,8 +176,6 @@ export const verifyOtpPassword = catchAsync(async (req,res) => {
         message: "Email verified successfully!",
         success: true
     });
-
-    console.log("otp input-- ",otpInput);
     
 })
 

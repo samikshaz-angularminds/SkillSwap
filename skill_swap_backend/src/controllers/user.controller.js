@@ -2,9 +2,10 @@ import cloudinary from "../config/cloudinaryConfig.js";
 import catchAsync from "../middlewares/catchAsync.js";
 import User from "../models/user.model.js";
 import sendResponse from "../responses/sendResponse.js"; // Adjust the path as needed
-import {getUserService,getAllUsersService, deleteUserService} from "../services/user.service.js";
+import {getUserService,getAllUsersService, deleteUserService,updateProfileImageService} from "../services/user.service.js";
 
 export const updateProfileImage = catchAsync(async (req,res) => {
+console.log(req.file);
 
 })
 

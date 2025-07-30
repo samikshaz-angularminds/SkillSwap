@@ -4,8 +4,15 @@ import User from "../models/user.model.js";
 import nodemailer from "nodemailer";
 import { envConfig } from '../config/envConfig.js';
 import ApiError from '../errors/ApiError.js';
+import redisClient from '../config/redis.js';
 
-let verifyOtp = "";
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: envConfig.sender_email,
+    pass: envConfig.sender_email_password
+  }
+})
 
 
 export const userSignUpService = async (userDetails) => {
@@ -49,10 +56,10 @@ export const userLoginService = async (email, password) => {
   return { accessToken, refreshToken };
 };
 
-export const resetPasswordService = async (email) => {
+export const forgotPasswordService = async (email) => {
   const otp = String(Math.floor(1000 + Math.random() * 9000));
   console.log("email in service: ", email);
-  verifyOtp = otp;
+
 
   const foundedUser = await User.findOne({ email });
 
@@ -60,21 +67,17 @@ export const resetPasswordService = async (email) => {
     throw new ApiError("User with this email id not found.")
   }
 
-  let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: envConfig.sender_email,
-      pass: envConfig.sender_email_password
-    }
-  })
+  await redisClient.setEx(`otp:${email}`, 300, otp)
+
 
   let mailOptions = {
-    from: envConfig.sender_email,
+    from: `"SkillSwap Support" <${envConfig.sender_email}>`,
     to: email,
     subject: 'Password Reset',
     text: `The otp is - ${otp}`
   }
-
+  const info = await transporter.sendMail(mailOptions);
+  console.log(info)
   await new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, function (error, info) {
       console.log(mailOptions);
@@ -88,11 +91,11 @@ export const resetPasswordService = async (email) => {
   return otp;
 }
 
-export const verifyOtpService = async (otp) => {
-  console.log("request object otp: ",otp);
-  console.log("verifying otp: ",verifyOtp);
-  
-  if(otp === verifyOtp){
+export const verifyOtpService = async ({ otpInput, email }) => {
+
+  const storedOtp = await redisClient.get(`otp:${email}`)
+
+  if (otpInput === storedOtp.toString()) {
     return true;
   }
   return false

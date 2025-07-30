@@ -6,6 +6,7 @@ dotenv.config()
 export const envConfig = {
   port: process.env.PORT,
   env : process.env.NODE_ENV,
+  redis_url: process.env.REDIS_URL,
   mongo_url : process.env.MONGODB_URL,
   db_name: process.env.DB_NAME,
   cloudinary : {
