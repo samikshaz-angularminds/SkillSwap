@@ -79,6 +79,8 @@ const UserSchema = new Schema(
       refreshToken: String,
     },
 
+    connections: [{ type: String, unique: true }],
+
     reviews: [
       {
         fromUserId: ObjectId,
@@ -90,7 +92,7 @@ const UserSchema = new Schema(
 
     points: Number, // XP-style gamification metric
 
-    matches: [ObjectId], // Matched users
+    // matches: [ObjectId], // Matched users
     messages: [ObjectId], // Message thread IDs
 
     createdAt: Date,

@@ -1,4 +1,4 @@
-import {userLogin,userSignUp,refreshAccessToken,userLogout,forgotPassword,verifyOtpPassword} from "../controllers/auth.controller.js"
+import {userLogin,userSignUp,refreshAccessToken,userLogout,forgotPassword,verifyOtpPassword,changePassword} from "../controllers/auth.controller.js"
 import express from "express";
 const router = express.Router();
 import { envConfig } from "../config/envConfig.js";
@@ -32,5 +32,6 @@ router.get(
 
 router.post("/forgot-password",forgotPassword)
 router.post("/verify-otp",verifyOtpPassword)
+router.put("/change-password",changePassword)
 
 export default router;

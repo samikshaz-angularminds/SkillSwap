@@ -2,11 +2,29 @@ import cloudinary from "../config/cloudinaryConfig.js";
 import catchAsync from "../middlewares/catchAsync.js";
 import User from "../models/user.model.js";
 import sendResponse from "../responses/sendResponse.js"; // Adjust the path as needed
-import {getUserService,getAllUsersService, deleteUserService,updateProfileImageService} from "../services/user.service.js";
+import { getUserService, getAllUsersService, deleteUserService, updateProfileImageService, updateUserService } from "../services/user.service.js";
 
-export const updateProfileImage = catchAsync(async (req,res) => {
-console.log(req.file);
+export const updateProfileImage = catchAsync(async (req, res) => {
+    // console.log(req.file);
 
+    const updateProfilePic = await updateProfileImageService(req.file.path)
+
+    // console.log("updateProfilePic-- ", updateProfilePic);
+
+    if (!updateProfilePic) {
+        return sendResponse(res, {
+            statusCode: 404,
+            success: false,
+            message: "User not found",
+        });
+    }
+
+    sendResponse(res, {
+        statusCode: 200,
+        message: "User updated successfully",
+        data: updateProfilePic,
+        success: true
+    });
 })
 
 // Update User
@@ -14,23 +32,10 @@ export const updateUser = catchAsync(async (req, res) => {
     const userId = req.params.id;
     const { name, username, bio, location, email } = req.body;
 
-    let avatarUpdate = {};
-    if (req.file?.path) {
-        avatarUpdate = await uploadImage(req.file.path);
-    }
+    console.log(req.body);
+    
 
-    const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-            name,
-            username,
-            bio,
-            location,
-            email,
-            ...(avatarUpdate.public_id && { avatar: avatarUpdate }),
-        },
-        { new: true }
-    );
+    const updatedUser = await updateUserService({ userId, userData: req.body })
 
     if (!updatedUser) {
         return sendResponse(res, {
@@ -67,6 +72,7 @@ export const deleteUser = catchAsync(async (req, res) => {
 
     sendResponse(res, {
         message: "User deleted successfully",
+        success: true
     });
 });
 

@@ -27,6 +27,25 @@ export const getUserService = async (userId) => {
   return user;
 };
 
+export const updateUserService = async ({userId, userData}) => {
+  const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        {
+            ...userData
+        },
+        { new: true }
+    );
+
+    return updatedUser;
+}
+
+export const deleteUser = async (userId) => {
+  const deletedUser = await User.findByIdAndDelete(userId);
+
+  console.log("deleted user- ",deleteUser);
+  
+}
+
 export const getAllUsersService = async (userId) => {
       const users = await User.find({_id: {$ne: userId}}).select("-_id -password -__v");
 
@@ -92,7 +111,3 @@ export const updateProfileImageService = async (filePath) => {
   return uploadImageUtil(filePath);
 };
 
-// This is the user service file.
-// Add your user-related functions and logic here.
-// This is the user service file.
-// Add your user-related functions and logic here.

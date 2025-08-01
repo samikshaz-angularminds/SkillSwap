@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { envConfig } from "../config/envConfig.js";
-import { userSignUpService, forgotPasswordService, verifyOtpService } from "../services/auth.service.js"
+import { userSignUpService, forgotPasswordService, verifyOtpService, changePasswordService } from "../services/auth.service.js"
 import catchAsync from "../middlewares/catchAsync.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -158,17 +158,17 @@ export const forgotPassword = catchAsync(async (req, res) => {
     });
 })
 
-export const verifyOtpPassword = catchAsync(async (req,res) => {
-    const {otpInput,email} = req.body;    
-    
-    const isVerified = await verifyOtpService({otpInput,email});
+export const verifyOtpPassword = catchAsync(async (req, res) => {
+    const { otpInput, email } = req.body;
 
-    if(!isVerified){
+    const isVerified = await verifyOtpService({ otpInput, email });
+
+    if (!isVerified) {
         return sendResponse(res, {
-        statusCode: 400,
-        message: "otp verification has failed.",
-        success: false
-    });
+            statusCode: 400,
+            message: "otp verification has failed.",
+            success: false
+        });
     }
 
     return sendResponse(res, {
@@ -176,6 +176,30 @@ export const verifyOtpPassword = catchAsync(async (req,res) => {
         message: "Email verified successfully!",
         success: true
     });
-    
+
+})
+
+export const changePassword = catchAsync(async (req, res) => {
+    const { email, oldPassword, newPassword, confirmPassword } = req.body;
+
+    console.log(req.body);
+
+    if (newPassword === confirmPassword) {
+
+        const passwordReset = await changePasswordService({ email, oldPassword, newPassword })
+
+        return sendResponse(res, {
+            statusCode: 200,
+            message: "password changed successfully!!",
+            success: true
+        });
+    }
+
+    return sendResponse(res, {
+        statusCode: 400,
+        message: "change of password has failed.",
+        success: false
+    });
+
 })
 

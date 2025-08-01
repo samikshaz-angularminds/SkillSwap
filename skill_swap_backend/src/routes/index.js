@@ -1,6 +1,7 @@
 import express from "express";
 import userRoutes from "./user.routes.js";
 import authRoutes from "./auth.routes.js";
+import connectionRoutes from "./connections.routes.js";
 
 const router = express.Router();
 
@@ -12,7 +13,11 @@ const defaultRoutes = [
     {
         path: "/user",
         route: userRoutes
-    }
+    },
+    {
+        path: "/connections",
+        route: connectionRoutes
+    },
 ];
 
 defaultRoutes.forEach((route) => {

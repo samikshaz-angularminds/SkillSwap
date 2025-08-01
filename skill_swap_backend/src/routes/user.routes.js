@@ -18,6 +18,7 @@ router.route("/:id")
 
 
 router.put("/update-profile-pic/:id", upload.single("avatar"),updateProfileImage)
+router.put("/update-profile-info/:id",authenticateToken,updateUser)
 
 router.get("/",authenticateToken,getAllUsers);
 

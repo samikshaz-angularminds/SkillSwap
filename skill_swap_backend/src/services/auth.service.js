@@ -1,18 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import User from "../models/user.model.js";
-import nodemailer from "nodemailer";
 import { envConfig } from '../config/envConfig.js';
 import ApiError from '../errors/ApiError.js';
 import redisClient from '../config/redis.js';
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: envConfig.sender_email,
-    pass: envConfig.sender_email_password
-  }
-})
+import { transporter } from '../utils/sendEmailUtil.js';
 
 
 export const userSignUpService = async (userDetails) => {
@@ -58,8 +50,7 @@ export const userLoginService = async (email, password) => {
 
 export const forgotPasswordService = async (email) => {
   const otp = String(Math.floor(1000 + Math.random() * 9000));
-  console.log("email in service: ", email);
-
+  // console.log("email in service: ", email);
 
   const foundedUser = await User.findOne({ email });
 
@@ -76,11 +67,13 @@ export const forgotPasswordService = async (email) => {
     subject: 'Password Reset',
     text: `The otp is - ${otp}`
   }
-  const info = await transporter.sendMail(mailOptions);
-  console.log(info)
+
+  await transporter.sendMail(mailOptions);
+
+  // console.log(info)
   await new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, function (error, info) {
-      console.log(mailOptions);
+      // console.log(mailOptions);
 
       if (error) { return reject(new ApiError("Error occurred while sending an email")) }
       resolve(info)
@@ -99,4 +92,22 @@ export const verifyOtpService = async ({ otpInput, email }) => {
     return true;
   }
   return false
+}
+
+export const changePasswordService = async ({ email, oldPassword, newPassword }) => {
+
+  const updatePassword = await User.findOneAndUpdate({email},
+    {
+      $set: {
+        password: newPassword
+      }
+    },
+    {
+      new: true
+    })
+
+  // console.log("password updated-- ", updatePassword);
+
+
+
 }
