@@ -23,6 +23,7 @@ const generateAccessToken = (user) => {
 
     const payload = {
         id: user._id.toString(),
+        uid: user.uid,
         email: user.email,
         username: user.username,
     };
@@ -128,9 +129,10 @@ export const userLogin = catchAsync(async (req, res) => {
             accessToken,
             user: {
                 id: user._id,
+                uid: user.uid,
                 name: user.name,
                 email: user.email,
-                avatar: user.avatar,
+                avatar: user.avatar
             },
         },
         success: true

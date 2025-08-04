@@ -10,7 +10,7 @@ export default function authenticateToken(req,res,next) {
 
     jwt.verify(token, envConfig.access_token_secret,(err,user) => {
         if(err) return res.sendStatus(403);
-        req.user = user;
+        req.user = user;        
         next();
     })
     

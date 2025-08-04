@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const { Schema, model, Types } = mongoose;
+const { Schema, model } = mongoose;
 
 const connectionSchema = new Schema({
     from: {
@@ -23,6 +23,6 @@ const connectionSchema = new Schema({
     respondedAt: { type: Date }
 });
 
-const Connection = model('Connection',connectionSchema);
+const ConnectionRequest = model('ConnectionRequest',connectionSchema);
 
-export default Connection;
+export default ConnectionRequest;
