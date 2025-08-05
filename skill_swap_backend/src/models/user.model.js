@@ -19,7 +19,7 @@ const avatarSchema = new mongoose.Schema({
 const UserSchema = new Schema(
   {
     uid: {
-      type: String,
+      type: 'UUID', // Using UUID for unique user identifier
       required: true,
       unique: true, // Ensures that uid is unique
       index: true,  // Optional: creates an index for faster lookups
@@ -33,6 +33,7 @@ const UserSchema = new Schema(
     email: { type: String, unique: true },
     password: String, // Hashed password
     authProvider: String, // e.g., "local", "google", "github"
+    outhId: String,
 
     avatar: avatarSchema, // Profile picture
     bio: {

@@ -1,23 +1,13 @@
 import catchAsync from "../middlewares/catchAsync.js"
-import {
-    acceptConnectionRequestService,
-    cancelConnectionRequestService,
-    rejectConnectionRequestService,
-    sendConnectionRequestService,
-    showAcceptedRequestService,
-    showPendingRequestService,
-    showReceivedRequestService
-} from "../services/connections.service.js";
+import connectionService from "../services/connections.service.js";
 import sendResponse from "../responses/sendResponse.js";
 import ApiError from "../errors/ApiError.js";
 
-
-
-export const sendConnectionRequest = catchAsync(async (req, res) => {
+const sendConnectionRequest = catchAsync(async (req, res) => {
     const from = req.user.uid;
     const to = req.params.id
 
-    const sentRequest = await sendConnectionRequestService({ from, to })
+    const sentRequest = await connectionService.sendConnectionRequestService({ from, to })
 
     if (!sentRequest) {
         throw new ApiError("Could not send the connection request. Please try again later")
@@ -30,11 +20,11 @@ export const sendConnectionRequest = catchAsync(async (req, res) => {
     });
 })
 
-export const acceptConnectionRequest = catchAsync(async (req, res) => {
+const acceptConnectionRequest = catchAsync(async (req, res) => {
     const to = req.user.uid;
     const from = req.params.id;
 
-    const acceptRequest = await acceptConnectionRequestService({ to, from })
+    const acceptRequest = await connectionService.acceptConnectionRequestService({ to, from })
     console.log("accepting connection request...", acceptRequest);
 
     if (!acceptRequest) {
@@ -48,12 +38,12 @@ export const acceptConnectionRequest = catchAsync(async (req, res) => {
     })
 })
 
-export const rejectConnectionRequest = catchAsync(async (req, res) => {
+const rejectConnectionRequest = catchAsync(async (req, res) => {
 
     const to = req.user.uid;
     const from = req.params.id;
 
-    const rejectRequest = await rejectConnectionRequestService({ to, from });
+    const rejectRequest = await connectionService.rejectConnectionRequestService({ to, from });
 
     if (!rejectRequest) {
         throw new ApiError("No pending request found to reject.")
@@ -68,11 +58,11 @@ export const rejectConnectionRequest = catchAsync(async (req, res) => {
 
 })
 
-export const cancelConnectionRequest = catchAsync(async (req, res) => {
+const cancelConnectionRequest = catchAsync(async (req, res) => {
     const from = req.user.uid;
     const to = req.params.id;
 
-    const cancelRequest = await cancelConnectionRequestService({ to, from });
+    const cancelRequest = await connectionService.cancelConnectionRequestService({ to, from });
 
     if (!cancelRequest) {
         throw new ApiError("No pending connection request found to cancel");
@@ -86,7 +76,7 @@ export const cancelConnectionRequest = catchAsync(async (req, res) => {
     })
 })
 
-export const showPendingRequest = catchAsync(async (req, res) => {
+const showPendingRequest = catchAsync(async (req, res) => {
 
     const pendingRequests = await showPendingRequestService(req.user.uid);
 
@@ -103,7 +93,7 @@ export const showPendingRequest = catchAsync(async (req, res) => {
 
 })
 
-export const showReceivedRequest = catchAsync(async (req, res) => {
+const showReceivedRequest = catchAsync(async (req, res) => {
 
     const receivedRequests = await showReceivedRequestService(req.user.uid);
 
@@ -120,7 +110,7 @@ export const showReceivedRequest = catchAsync(async (req, res) => {
 
 })
 
-export const showAcceptedRequest = catchAsync(async (req, res) => {
+const showAcceptedRequest = catchAsync(async (req, res) => {
 
     const acceptedRequests = await showAcceptedRequestService(req.user.uid);
 
@@ -136,3 +126,14 @@ export const showAcceptedRequest = catchAsync(async (req, res) => {
     });
 
 })
+
+
+export default {
+    sendConnectionRequest,
+    acceptConnectionRequest,
+    rejectConnectionRequest,
+    cancelConnectionRequest,
+    showPendingRequest,
+    showReceivedRequest,
+    showAcceptedRequest
+}

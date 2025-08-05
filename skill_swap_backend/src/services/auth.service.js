@@ -5,19 +5,70 @@ import { envConfig } from '../config/envConfig.js';
 import ApiError from '../errors/ApiError.js';
 import redisClient from '../config/redis.js';
 import { transporter } from '../utils/sendEmailUtil.js';
+import { OAuth2Client } from "google-auth-library"
+import {randomUUID} from 'crypto'
 
 
-export const userSignUpService = async (userDetails) => {
-  // console.log("user details-- ",userDetails.email);
-  const newUser = await User.create({ uid: uuidv4(), ...userDetails });
+const client = new OAuth2Client(envConfig.google_client_id);
 
-  //  console.log("new user == ",newUser);
+//geenerate 
+const generateAccessToken = (user) => {
+  // console.log("user in access token: ", user);
 
-  // let avatarUrl = null;
-  // if (avatar) {
-  //   const avatarPublicId = uuidv4();
-  //   avatarUrl = await uploadImageUtil(avatar, avatarPublicId);
-  // }
+  const payload = {
+    id: user._id.toString(),
+    uid: user.uid,
+    email: user.email,
+    username: user.username,
+  };
+
+  return jwt.sign(payload, envConfig.access_token_secret, { expiresIn: '1h' });
+}
+
+const generateRefreshToken = (user) => {
+  // console.log("user in refresh token: ", user);
+  const payload = {
+    id: user._id.toString(),
+    email: user.email,
+    username: user.username,
+  };
+  const token = jwt.sign(payload, envConfig.refresh_token_secret, { expiresIn: '7d' });
+  refreshTokens.push(token);
+  return token;
+}
+
+// refresh access token
+const refreshAccessToken = (req, res) => {
+  const token = req.cookies.refreshToken;
+
+  if (!token || !refreshTokens.includes(token)) return res.sendStatus(403);
+
+  jwt.verify(token, envConfig.refresh_token_secret, (err, user) => {
+    if (err) return res.sendStatus(403);
+
+    const accessToken = generateAccessToken(user);
+
+    sendResponse(res,
+      {
+        statusCode: 200,
+        success: true,
+        message: "Access token refreshed successfully",
+        data: { accessToken }
+      }
+    );
+  })
+}
+
+const userSignUpService = async (userDetails) => {
+
+  const existingUser = await User.findOne({ email: userDetails.email });
+
+  if (existingUser) {
+    throw new ApiError("User with this email ID already exists")
+  }
+  // const hashedPassword = await bcrypt.hash(userDetails.password, 12);
+
+  const newUser = await User.create({ uid: () => randomUUID(), ...userDetails });
 
   return newUser;
 };
@@ -29,26 +80,45 @@ export const userSignUpService = async (userDetails) => {
  * @param {string} password - The user's password.
  * @returns {Promise<Object|null>} An object containing access and refresh tokens if login is successful, or null otherwise.
  */
-export const userLoginService = async (email, password) => {
-  const user = await User.findOne({ email });
+const userLoginService = async (requestBody) => {
+  const user = await User.findOne({ email: requestBody.email });
 
   if (!user) {
-    return null; // User not found
+    throw new ApiError("User not found")
   }
 
-  const isPasswordMatch = await bcrypt.compare(password, user.password);
+  // const isPasswordMatch = bcrypt.compare(password, user.password);
 
-  if (!isPasswordMatch) {
-    return null; // Password doesn't match
-  }
+  // if (!isPasswordMatch) {
+  //   return null; // Password doesn't match
+  // }
 
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
-
-  return { accessToken, refreshToken };
+  return user;
 };
 
-export const forgotPasswordService = async (email) => {
+const googleLoginService = async (requestBody) => {
+  console.log(requestBody);
+
+  const ticket = await client.verifyIdToken({
+    idToken: requestBody.idToken,
+    audience: envConfig.google_client_id
+  })
+
+
+
+  const payload = ticket.getPayload();
+
+  const existingUser = await User.findOne({email: payload.email});
+
+  if(!existingUser){
+
+  }
+
+  console.log("payload-- ",payload);
+
+}
+
+const forgotPasswordService = async (email) => {
   const otp = String(Math.floor(1000 + Math.random() * 9000));
   // console.log("email in service: ", email);
 
@@ -84,19 +154,26 @@ export const forgotPasswordService = async (email) => {
   return otp;
 }
 
-export const verifyOtpService = async ({ otpInput, email }) => {
+// { otpInput, email } = req.body;
+const verifyOtpService = async (requestBody) => {
 
-  const storedOtp = await redisClient.get(`otp:${email}`)
+  const storedOtp = await redisClient.get(`otp:${requestBody.email}`)
 
-  if (otpInput === storedOtp.toString()) {
-    return true;
+  if (requestBody.otpInput !== storedOtp.toString()) {
+    throw new ApiError("Invalid OTP.")
   }
-  return false
+  return true;
 }
 
-export const changePasswordService = async ({ email, oldPassword, newPassword }) => {
 
-  const updatePassword = await User.findOneAndUpdate({email},
+//  { email, oldPassword, newPassword, confirmPassword } = req.body;
+const changePasswordService = async (requestBody) => {
+
+  if (requestBody.newPassword !== requestBody.confirmPassword) {
+    throw new ApiError("New Password and confirm password does not match")
+  }
+
+  const updatePassword = await User.findOneAndUpdate({ email },
     {
       $set: {
         password: newPassword
@@ -109,5 +186,17 @@ export const changePasswordService = async ({ email, oldPassword, newPassword })
   // console.log("password updated-- ", updatePassword);
 
 
+  return updatePassword;
+}
 
+export default {
+  generateAccessToken,
+  generateRefreshToken,
+  refreshAccessToken,
+  userSignUpService,
+  userLoginService,
+  googleLoginService,
+  forgotPasswordService,
+  verifyOtpService,
+  changePasswordService
 }

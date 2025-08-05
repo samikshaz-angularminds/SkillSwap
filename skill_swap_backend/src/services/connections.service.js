@@ -2,7 +2,7 @@ import ApiError from "../errors/ApiError.js";
 import ConnectionRequest from "../models/connection.model.js";
 
 
-export const sendConnectionRequestService = async (requestBody) => {
+const sendConnectionRequestService = async (requestBody) => {
     if (!requestBody.from || !requestBody.to) {
         throw new ApiError("Body must contain to and from fields");
     }
@@ -25,7 +25,7 @@ export const sendConnectionRequestService = async (requestBody) => {
 
 }
 
-export const acceptConnectionRequestService = async (requestBody) => {
+const acceptConnectionRequestService = async (requestBody) => {
 
     const updateRequestStatus = await ConnectionRequest.findOneAndUpdate(
         {
@@ -48,7 +48,7 @@ export const acceptConnectionRequestService = async (requestBody) => {
     return updateRequestStatus;
 }
 
-export const rejectConnectionRequestService = async (requestBody) => {
+const rejectConnectionRequestService = async (requestBody) => {
 
     const updateRequestStatus = await ConnectionRequest.findOneAndUpdate(
         {
@@ -71,7 +71,7 @@ export const rejectConnectionRequestService = async (requestBody) => {
     return updateRequestStatus;
 }
 
-export const cancelConnectionRequestService = async (requestBody) => {
+const cancelConnectionRequestService = async (requestBody) => {
 
     const cancelRequest = await ConnectionRequest.findOneAndDelete(
         {
@@ -88,23 +88,33 @@ export const cancelConnectionRequestService = async (requestBody) => {
     return cancelRequest
 }
 
-export const showPendingRequestService = async (userId) => {
+const showPendingRequestService = async (userId) => {
     const pendingRequests = await ConnectionRequest.find({ from: userId, status: "pending" });
 
     return pendingRequests
 }
 
-export const showReceivedRequestService = async (userId) => {
+const showReceivedRequestService = async (userId) => {
     const receivedRequests = await ConnectionRequest.find({ to: userId, status: "pending" });
     return receivedRequests
 }
 
-export const showAcceptedRequestService = async (userId) => {
+const showAcceptedRequestService = async (userId) => {
     const acceptedRequests = await ConnectionRequest.find({ to: userId, status: "accepted" });
 
     return acceptedRequests
 }
 
+
+export default {
+sendConnectionRequestService,
+acceptConnectionRequestService,
+rejectConnectionRequestService,
+cancelConnectionRequestService,
+showPendingRequestService,
+showReceivedRequestService,
+showAcceptedRequestService
+}
 
 
 

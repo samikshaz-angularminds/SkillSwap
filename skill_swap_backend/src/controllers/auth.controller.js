@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { envConfig } from "../config/envConfig.js";
-import { userSignUpService, forgotPasswordService, verifyOtpService, changePasswordService } from "../services/auth.service.js"
+import authService from "../services/auth.service.js"
 import catchAsync from "../middlewares/catchAsync.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -17,76 +17,10 @@ const REFRESH_TOKEN_COOKIE_OPTIONS = {
     path: '/refresh-token'
 }
 
-//geenerate 
-const generateAccessToken = (user) => {
-    // console.log("user in access token: ", user);
-
-    const payload = {
-        id: user._id.toString(),
-        uid: user.uid,
-        email: user.email,
-        username: user.username,
-    };
-
-    return jwt.sign(payload, envConfig.access_token_secret, { expiresIn: '1h' });
-}
-
-const generateRefreshToken = (user) => {
-    // console.log("user in refresh token: ", user);
-    const payload = {
-        id: user._id.toString(),
-        email: user.email,
-        username: user.username,
-    };
-    const token = jwt.sign(payload, envConfig.refresh_token_secret, { expiresIn: '7d' });
-    refreshTokens.push(token);
-    return token;
-}
-
-// refresh access token
-export const refreshAccessToken = (req, res) => {
-    const token = req.cookies.refreshToken;
-
-    if (!token || !refreshTokens.includes(token)) return res.sendStatus(403);
-
-    jwt.verify(token, envConfig.refresh_token_secret, (err, user) => {
-        if (err) return res.sendStatus(403);
-
-        const accessToken = generateAccessToken(user);
-
-        sendResponse(res,
-            {
-                statusCode: 200,
-                success: true,
-                message: "Access token refreshed successfully",
-                data: { accessToken }
-            }
-        );
-
-    })
-}
-
 // Register New User
-export const userSignUp = catchAsync(async (req, res) => {
-    const { email } = req.body;
-    // console.log("email here-- ", req.body);
+const userSignUp = catchAsync(async (req, res) => {
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        throw new Error('User with this email already exists');
-    }
-
-    const signUpUser = await userSignUpService({ ...req.body });
-
-    // const hashedPassword = await bcrypt.hash(password, 12);
-
-    // let avatar = { public_id: "", url: "" };
-    // if (req.file?.path) {
-    //     avatar = await uploadImage(req.file.path);
-    // }
-
-    // console.log("signup user: ",signUpUser);
-
+    const signUpUser = await authService.userSignUpService({ ...req.body });
 
     sendResponse(res,
         {
@@ -97,25 +31,13 @@ export const userSignUp = catchAsync(async (req, res) => {
 });
 
 // Login User
-export const userLogin = catchAsync(async (req, res) => {
-    const { email, password } = req.body;
+const userLogin = catchAsync(async (req, res) => {
 
-    // console.log("login request object-- ", req.body);
+    const user = await authService.userLoginService(...req.body)
 
 
-    const user = await User.findOne({ email, password });
-    // if (!user || !(await bcrypt.compare(password, user.password))) {
-    if (!user) {
-
-        return sendResponse(res, {
-            statusCode: 401,
-            success: false,
-            message: "Invalid credentials",
-        });
-    }
-
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = authService.generateAccessToken(user);
+    const refreshToken = authService.generateRefreshToken(user);
 
     // console.log("access token-- ",accessToken);
     // console.log("refresh token-- ",refreshToken);
@@ -139,7 +61,11 @@ export const userLogin = catchAsync(async (req, res) => {
     });
 });
 
-export const userLogout = catchAsync(async (req, res) => {
+const googleLogin = catchAsync(async (req, res) => {
+    const loginResponse = await authService.googleLoginService(req.body);
+})
+
+const userLogout = catchAsync(async (req, res) => {
     res.clearCookie("refreshToken", REFRESH_TOKEN_COOKIE_OPTIONS)
     return sendResponse(res, {
         statusCode: 200,
@@ -148,10 +74,8 @@ export const userLogout = catchAsync(async (req, res) => {
     })
 })
 
-export const forgotPassword = catchAsync(async (req, res) => {
-    const { email } = req.body;
-
-    await forgotPasswordService(email);
+const forgotPassword = catchAsync(async (req, res) => {
+    await authService.forgotPasswordService(req.body.email);
 
     return sendResponse(res, {
         statusCode: 200,
@@ -160,48 +84,39 @@ export const forgotPassword = catchAsync(async (req, res) => {
     });
 })
 
-export const verifyOtpPassword = catchAsync(async (req, res) => {
-    const { otpInput, email } = req.body;
+const verifyOtpPassword = catchAsync(async (req, res) => {
 
-    const isVerified = await verifyOtpService({ otpInput, email });
-
-    if (!isVerified) {
-        return sendResponse(res, {
-            statusCode: 400,
-            message: "otp verification has failed.",
-            success: false
-        });
-    }
+    const isVerified = await authService.verifyOtpService(...req.body);
 
     return sendResponse(res, {
         statusCode: 200,
         message: "Email verified successfully!",
-        success: true
+        success: true,
+        data: { isVerified }
     });
 
 })
 
-export const changePassword = catchAsync(async (req, res) => {
-    const { email, oldPassword, newPassword, confirmPassword } = req.body;
+const changePassword = catchAsync(async (req, res) => {
 
-    console.log(req.body);
-
-    if (newPassword === confirmPassword) {
-
-        const passwordReset = await changePasswordService({ email, oldPassword, newPassword })
-
-        return sendResponse(res, {
-            statusCode: 200,
-            message: "password changed successfully!!",
-            success: true
-        });
-    }
+    const passwordReset = await authService.changePasswordService(...req.body)
 
     return sendResponse(res, {
-        statusCode: 400,
-        message: "change of password has failed.",
-        success: false
+        statusCode: 200,
+        data: passwordReset,
+        message: "password changed successfully",
+        success: false,
     });
 
 })
+
+export default {
+    userSignUp,
+    userLogin,
+    googleLogin,
+    userLogout,
+    forgotPassword,
+    verifyOtpPassword,
+    changePassword
+}
 

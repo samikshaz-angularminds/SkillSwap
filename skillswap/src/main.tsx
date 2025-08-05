@@ -36,6 +36,7 @@ if (rootElement && !rootElement.innerHTML) {
 
   root.render(
     <StrictMode>
+      
       <HelmetProvider>
 
       <QueryClientProvider client={queryClient}>

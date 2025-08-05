@@ -13,6 +13,9 @@ import { envConfig } from "@/config/envConfig";
 import LoginForm from "./forms/LoginForm";
 import { useEffect, useState } from "react";
 import SignUpForm from "./forms/SignUpForm";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
+import { authService } from "@/services/auth.service";
 
 const loginFormValues: { label: string; type: string; placeholder: string }[] =
   [
@@ -35,12 +38,26 @@ const signupFormValues: { label: string; type: string; placeholder: string }[] =
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [hasLoggedIn, setHasLoggedIn] = useState<boolean>(false);
+  console.log(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+  
 
-  useEffect(() => {},[hasLoggedIn])
+  useEffect(() => {}, [hasLoggedIn]);
 
-  const handleGoogleSignIn = () => {    
+  const handleGoogleSignIn = async () => {
     window.location.href = `${envConfig.apiBaseUrl}/auth/google`;
   };
+
+  const handleGoogleLoginSuccess = async (credentialResponse: CredentialResponse) => {
+    console.log(credentialResponse);
+
+    if(credentialResponse.credential){
+      const response = await authService.googleLogin(credentialResponse.credential)
+      console.log(response);
+      
+    }
+  };
+
+  const handleGoogleLoginError = () => {};
 
   return (
     <Dialog>
@@ -71,9 +88,29 @@ const LoginSignup = () => {
         <div className="flex flex-col gap-4">
           {isLogin ? (
             <div>
-              <LoginForm setHasLoggedIn={setHasLoggedIn} formValues={loginFormValues} />
+              <LoginForm
+                setHasLoggedIn={setHasLoggedIn}
+                formValues={loginFormValues}
+              />
 
               <div className="text-center text-muted-foreground">OR</div>
+              {/* <div
+                id="g_id_onload"
+                data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                data-callback="handleCredentialResponse"
+              >
+                log
+              </div> */}
+
+              <GoogleOAuthProvider
+                clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
+              >
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={handleGoogleLoginError}
+                />
+              </GoogleOAuthProvider>
+
               <Button
                 variant="outline"
                 className="w-full flex items-center gap-2"

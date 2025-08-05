@@ -4,5 +4,6 @@ import type { loginData } from "@/components/forms/LoginForm";
 
 export const authService = {
     signup: async (data: registerData) => apiService.post('/auth/signup', data),
-    login: async (data: loginData) => apiService.post('/auth/login', data)
+    login: async (data: loginData) => apiService.post('/auth/login', data),
+    googleLogin: async (idToken:string) => apiService.post('/auth/google',{idToken})
 }
